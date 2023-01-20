@@ -34,6 +34,8 @@ abstract class AnswerFormat {
         return ScaleAnswerFormat.fromJson(json);
       case 'time':
         return TimeAnswerFormat.fromJson(json);
+      case 'image':
+        return ImageAnswerFormat.fromJson(json);
       default:
         throw AnswerFormatNotDefinedException();
     }
