@@ -8,7 +8,7 @@ import '../answer_format/image_answer_format.dart';
 
 class ImageAnswerView extends StatefulWidget {
   final QuestionStep questionStep;
-  final TextQuestionResult? result;
+  final ImageQuestionResult? result;
 
   const ImageAnswerView({
     Key? key,
@@ -56,7 +56,7 @@ class _ImageAnswerViewState extends State<ImageAnswerView> {
   Widget build(BuildContext context) {
     return StepView(
       step: widget.questionStep,
-      resultFunction: () => TextQuestionResult(
+      resultFunction: () => ImageQuestionResult(
         id: widget.questionStep.stepIdentifier,
         startDate: _startDate,
         endDate: DateTime.now(),
