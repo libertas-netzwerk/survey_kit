@@ -7,7 +7,7 @@ import 'package:survey_kit/src/views/instruction_view.dart';
 
 part 'instruction_step.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class InstructionStep extends Step {
   final String title;
   final String text;

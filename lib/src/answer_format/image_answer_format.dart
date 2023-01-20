@@ -5,16 +5,21 @@ part 'image_answer_format.g.dart';
 
 @JsonSerializable()
 class ImageAnswerFormat implements AnswerFormat {
-  final String? defaultValue;
-  final String buttonText;
+  final int? maxLines;
+  @JsonKey(defaultValue: '')
+  final String hint;
+
+  /// Regular expression by which the text gets validated
+  ///  e.g '^(?!\s*$).+' checks if the entered text is empty
+  final String? validationRegEx;
 
   const ImageAnswerFormat({
-    this.defaultValue,
-    this.buttonText = 'Image: ',
+    this.maxLines,
+    this.hint = '',
+    this.validationRegEx,
   }) : super();
 
   factory ImageAnswerFormat.fromJson(Map<String, dynamic> json) =>
       _$ImageAnswerFormatFromJson(json);
-
   Map<String, dynamic> toJson() => _$ImageAnswerFormatToJson(this);
 }

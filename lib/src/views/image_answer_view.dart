@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:survey_kit/src/answer_format/image_answer_format.dart';
-import 'package:survey_kit/src/result/question/image_question_result.dart';
+import 'package:survey_kit/src/views/decoration/input_decoration.dart';
+import 'package:survey_kit/src/result/question/text_question_result.dart';
 import 'package:survey_kit/src/steps/predefined_steps/question_step.dart';
 import 'package:survey_kit/src/views/widget/step_view.dart';
 
+import '../answer_format/image_answer_format.dart';
+
 class ImageAnswerView extends StatefulWidget {
   final QuestionStep questionStep;
-  final ImageQuestionResult? result;
+  final TextQuestionResult? result;
 
   const ImageAnswerView({
     Key? key,
@@ -16,25 +17,38 @@ class ImageAnswerView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ImageAnswerView> createState() => _ImageAnswerViewState();
+  _ImageAnswerViewState createState() => _ImageAnswerViewState();
 }
 
 class _ImageAnswerViewState extends State<ImageAnswerView> {
   late final ImageAnswerFormat _imageAnswerFormat;
   late final DateTime _startDate;
 
+  late final TextEditingController _controller;
   bool _isValid = false;
-  String filePath = '';
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController();
+    _controller.text = widget.result?.result ?? '';
     _imageAnswerFormat = widget.questionStep.answerFormat as ImageAnswerFormat;
+    _checkValidation(_controller.text);
     _startDate = DateTime.now();
+  }
+
+  void _checkValidation(String text) {
+    setState(() {
+      if (_imageAnswerFormat.validationRegEx != null) {
+        RegExp regExp = new RegExp(_imageAnswerFormat.validationRegEx!);
+        _isValid = regExp.hasMatch(text);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     super.dispose();
   }
 
@@ -42,14 +56,13 @@ class _ImageAnswerViewState extends State<ImageAnswerView> {
   Widget build(BuildContext context) {
     return StepView(
       step: widget.questionStep,
-      resultFunction: () => ImageQuestionResult(
+      resultFunction: () => TextQuestionResult(
         id: widget.questionStep.stepIdentifier,
         startDate: _startDate,
         endDate: DateTime.now(),
-        valueIdentifier: filePath,
-        result: filePath,
+        valueIdentifier: _controller.text,
+        result: _controller.text,
       ),
-      isValid: _isValid || widget.questionStep.isOptional,
       title: widget.questionStep.title.isNotEmpty
           ? Text(
               widget.questionStep.title,
@@ -57,105 +70,34 @@ class _ImageAnswerViewState extends State<ImageAnswerView> {
               textAlign: TextAlign.center,
             )
           : widget.questionStep.content,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32.0),
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32.0,
-                  vertical: 8.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        _optionsDialogBox();
-                      },
-                      child: Text(_imageAnswerFormat.buttonText),
-                    ),
-                    filePath.isNotEmpty
-                        ? Flexible(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                filePath
-                                    .split('/')[filePath.split('/').length - 1],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          )
-                        : SizedBox(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _optionsDialogBox() {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                GestureDetector(
-                  child: Text('Take a picture'),
-                  onTap: () {
-                    _openCamera();
-                  },
-                ),
-                Padding(padding: EdgeInsets.all(8.0)),
-                GestureDetector(
-                  child: Text('Select from Gallery'),
-                  onTap: () {
-                    _openGallery();
-                  },
-                ),
-              ],
+      isValid: _isValid || widget.questionStep.isOptional,
+      child: Column(
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.only(bottom: 32.0, left: 14.0, right: 14.0),
+            child: Text(
+              widget.questionStep.text,
+              style: Theme.of(context).textTheme.bodyText2,
+              textAlign: TextAlign.center,
             ),
           ),
-        );
-      },
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: 50.0,
+            child: TextField(
+              decoration: textFieldInputDecoration(
+                hint: _imageAnswerFormat.hint,
+              ),
+              controller: _controller,
+              textAlign: TextAlign.center,
+              onChanged: (String text) {
+                _checkValidation(text);
+              },
+            ),
+          ),
+        ],
+      ),
     );
-  }
-
-  Future<void> _openCamera() async {
-    var picture = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-    );
-
-    Navigator.pop(context);
-
-    picture?.readAsBytes().then((value) {
-      setState(() {
-        filePath = picture.path;
-      });
-    });
-  }
-
-  Future<void> _openGallery() async {
-    var picture = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
-
-    Navigator.pop(context);
-
-    picture?.readAsBytes().then((value) {
-      setState(() {
-        filePath = picture.path;
-      });
-    });
   }
 }

@@ -8,12 +8,14 @@ part of 'image_answer_format.dart';
 
 ImageAnswerFormat _$ImageAnswerFormatFromJson(Map<String, dynamic> json) =>
     ImageAnswerFormat(
-      defaultValue: json['defaulValue'] as String?,
-      buttonText: json['hint'] as String? ?? '',
+      maxLines: json['maxLines'] as int?,
+      hint: json['hint'] as String? ?? '',
+      validationRegEx: json['validationRegEx'] as String?,
     );
 
 Map<String, dynamic> _$ImageAnswerFormatToJson(ImageAnswerFormat instance) =>
     <String, dynamic>{
-      'defaultValue': instance.defaultValue,
-      'hint': instance.buttonText,
+      'maxLines': instance.maxLines,
+      'hint': instance.hint,
+      'validationRegEx': instance.validationRegEx,
     };
